@@ -15,6 +15,9 @@
       "autoIncrement": true,
       "env": {
         "EXPO_USE_CUSTOM_NPM_INSTALL": "1"
+      },
+      "android": {
+        "buildType": "apk"
       }
     }
   },
