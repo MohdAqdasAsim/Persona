@@ -179,5 +179,4 @@ const Login = () => {
   );
 };
 
-const WrappedOnLogin = BasicWrapper(Login);
-export default () => <WrappedOnLogin allowGuest />;
+export default BasicWrapper(Login);

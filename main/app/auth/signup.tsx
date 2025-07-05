@@ -209,5 +209,4 @@ const Signup = () => {
   );
 };
 
-const WrappedOnSignup = BasicWrapper(Signup);
-export default () => <WrappedOnSignup allowGuest />;
+export default BasicWrapper(Signup);

@@ -1,9 +1,19 @@
-import { BasicWrapper } from "@/components";
+import { TabsWrapper } from "@/components";
+import CellRenderer from "@/components/CellRenderer";
+import { useCellStore } from "@/stores/useCellStore";
 import React from "react";
-import { View } from "react-native";
+import { ScrollView } from "react-native";
 
 function Wellness() {
-  return <View className="flex-1 flex"></View>;
+  const cells = useCellStore((s) => s.getCells("wellness"));
+
+  return (
+    <ScrollView className="flex-1 px-4 py-6 space-y-4">
+      {cells.map((cell) => (
+        <CellRenderer key={cell.id} type={cell.type} />
+      ))}
+    </ScrollView>
+  );
 }
 
-export default BasicWrapper(Wellness);
+export default TabsWrapper(Wellness);

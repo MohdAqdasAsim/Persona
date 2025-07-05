@@ -260,5 +260,4 @@ const ProfileSetup = () => {
   );
 };
 
-const WrappedOnProfileSetup = BasicWrapper(ProfileSetup);
-export default () => <WrappedOnProfileSetup allowGuest />;
+export default BasicWrapper(ProfileSetup);
