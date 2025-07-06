@@ -4,7 +4,6 @@ import { useTheme } from "@/contexts/ThemeProvider";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const iconMap: Record<
   string,
@@ -29,7 +28,6 @@ export default function TabBar({
   navigation,
 }: BottomTabBarProps) {
   const { theme } = useTheme();
-  const insets = useSafeAreaInsets();
 
   return (
     <View
@@ -37,7 +35,7 @@ export default function TabBar({
       style={[
         {
           backgroundColor: Colors[theme].bg,
-          bottom: insets.bottom,
+          bottom: 0,
         },
       ]}
     >

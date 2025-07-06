@@ -1,4 +1,3 @@
-import { TabsWrapper } from "@/components";
 import CellRenderer from "@/components/CellRenderer";
 import { useCellStore } from "@/stores/useCellStore";
 import React from "react";
@@ -16,4 +15,4 @@ function Companion() {
   );
 }
 
-export default TabsWrapper(Companion);
+export default Companion;
