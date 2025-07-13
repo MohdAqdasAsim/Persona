@@ -1,6 +1,6 @@
 import { Cell } from "@/stores/useCellStore";
 import React from "react";
-import { Text } from "react-native";
+import { ScrollView, Text } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
@@ -13,27 +13,49 @@ import Animated, {
 type Props = {
   cell: Cell;
   isEditing: boolean;
-  onDragEnd: (id: string, newIndex: number) => void;
+  onDragEnd: (id: string, offsetY: number) => void;
+  scrollRef: React.RefObject<ScrollView>;
 };
 
-export default function DraggableCell({ cell, isEditing, onDragEnd }: Props) {
+export default function DraggableCell({
+  cell,
+  isEditing,
+  onDragEnd,
+  scrollRef,
+}: Props) {
+  const offsetX = useSharedValue(0);
   const offsetY = useSharedValue(0);
 
   const gestureHandler = useAnimatedGestureHandler({
     onStart: (_, ctx: any) => {
+      ctx.startX = offsetX.value;
       ctx.startY = offsetY.value;
     },
     onActive: (event, ctx: any) => {
+      offsetX.value = ctx.startX + event.translationX;
       offsetY.value = ctx.startY + event.translationY;
+
+      if (event.absoluteY && scrollRef?.current) {
+        runOnJS(() => {
+          scrollRef.current?.scrollTo({
+            y: event.absoluteY - 300,
+            animated: false,
+          });
+        })();
+      }
     },
     onEnd: () => {
-      runOnJS(onDragEnd)(cell.id, 0); // For now, just reset to 0
+      runOnJS(onDragEnd)(cell.id, offsetY.value);
+
+      // Animate back to aligned position
+      offsetX.value = withSpring(0);
       offsetY.value = withSpring(0);
     },
   });
 
   const style = useAnimatedStyle(() => ({
-    transform: [{ translateY: offsetY.value }],
+    transform: [{ translateX: offsetX.value }, { translateY: offsetY.value }],
+    zIndex: 10,
   }));
 
   return (
@@ -42,7 +64,7 @@ export default function DraggableCell({ cell, isEditing, onDragEnd }: Props) {
         className={`${
           cell.width === 2 ? "w-full" : "w-1/2"
         } bg-white/10 rounded-xl p-4 items-center justify-center`}
-        style={[style, { height: cell.height * 80, marginBottom: 4 }]}
+        style={[style, { height: cell.height * 80 }]}
       >
         <Text className="text-white">{cell.type}</Text>
       </Animated.View>
