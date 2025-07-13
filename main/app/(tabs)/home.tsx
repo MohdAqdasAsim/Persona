@@ -1,5 +1,6 @@
 import DraggableCell from "@/components/DraggableCell";
 import { useCellStore } from "@/stores/useCellStore";
+import { groupCells } from "@/utils/groupCells";
 import React from "react";
 import {
   FlatList,
@@ -22,59 +23,50 @@ function Home() {
     (c) => !currentIds.has(c.id)
   );
 
-  const handleDrop = (id: string, newX: number, newY: number) => {
-    const updated = cells.map((c) =>
-      c.id === id
-        ? {
-            ...c,
-            x: newX,
-            y: newY,
-            width: c.width ?? 1,
-            height: c.height ?? 1,
-          }
-        : c
-    );
+  const onDragEnd = (id: string, newIndex: number) => {
+    const oldIndex = cells.findIndex((c) => c.id === id);
+    if (oldIndex === -1) return;
 
-    // TEMP debug
-    const hasIncomplete = updated.some(
-      (c) => c.x == null || c.y == null || c.width == null || c.height == null
-    );
-
-    if (hasIncomplete) {
-      console.error(
-        "🚨 Incomplete cell found in update",
-        JSON.stringify(updated)
-      );
-      return;
-    }
-
-    setCells("home", updated);
+    const newCells = [...cells];
+    const [moved] = newCells.splice(oldIndex, 1);
+    newCells.splice(newIndex, 0, moved);
+    setCells("home", newCells);
   };
 
+  const grouped = groupCells(cells);
+
   return (
-    <View style={{ flex: 1, backgroundColor: "#000" }}>
-      <TouchableWithoutFeedback onLongPress={toggleEditing}>
-        <View
-          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-        />
-      </TouchableWithoutFeedback>
+    <View className="flex-1 bg-black">
+      {!isEditing && (
+        <TouchableWithoutFeedback onLongPress={toggleEditing}>
+          <View className="absolute inset-0 z-10" />
+        </TouchableWithoutFeedback>
+      )}
 
-      {/* Render all draggable cells */}
-      {cells.map((cell) => (
-        <DraggableCell key={cell.id} cell={cell} onDrop={handleDrop} />
-      ))}
+      <FlatList
+        data={grouped}
+        keyExtractor={(item, index) => `row-${index}`}
+        contentContainerStyle={{
+          paddingHorizontal: 12,
+          paddingBottom: 160,
+          gap: 12,
+        }}
+        renderItem={({ item: row }) => (
+          <View className="flex-row justify-center gap-4">
+            {row.map((cell) => (
+              <DraggableCell
+                key={cell.id}
+                cell={cell}
+                onDragEnd={onDragEnd}
+                isEditing={isEditing}
+              />
+            ))}
+          </View>
+        )}
+      />
 
-      {/* Add cell UI */}
       {isEditing && (
-        <View
-          style={{
-            position: "absolute",
-            bottom: 0,
-            width: "100%",
-            height: 160,
-            padding: 12,
-          }}
-        >
+        <View className="absolute bottom-0 w-full h-40 px-3 py-2 bg-black/90 z-20">
           <FlatList
             horizontal
             data={availableCells}
@@ -82,14 +74,9 @@ function Home() {
             renderItem={({ item }) => (
               <TouchableOpacity
                 onPress={() => addCell("home", item)}
-                style={{
-                  backgroundColor: "rgba(255,255,255,0.1)",
-                  borderRadius: 12,
-                  padding: 12,
-                  marginRight: 12,
-                }}
+                className="bg-white/10 rounded-xl px-4 py-3 mr-3"
               >
-                <Text style={{ color: "white" }}>{item.type}</Text>
+                <Text className="text-white">{item.type}</Text>
               </TouchableOpacity>
             )}
           />
